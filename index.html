@@ -39,10 +39,44 @@
             z-index: 1000;
             font-family: Arial, sans-serif;
         }
+        #camera-permission {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #camera-permission button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #camera-permission button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <div class="loading" id="loading">Loading AR Experience... Please wait.</div>
+    <div id="camera-permission">
+        <h2>Camera Access Required</h2>
+        <p>Please allow access to your camera to use this AR experience.</p>
+        <button id="grant-permission">Enable Camera</button>
+    </div>
     <div class="ar-overlay">
         AR Park Scene - Point camera at markers
     </div>
@@ -67,6 +101,128 @@
                 volume: 0.5
             })
         };
+
+        // Handle camera permission
+        document.getElementById('grant-permission').addEventListener('click', function() {
+            initializeAR();
+        });
+
+        function initializeAR() {
+            document.getElementById('camera-permission').style.display = 'none';
+            
+            // Create the AR scene dynamically
+            const arScene = document.createElement('a-scene');
+            arScene.setAttribute('embedded', '');
+            arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/camera_para.dat; maxDetectionRate: 30; canvasWidth: window.innerWidth; canvasHeight: window.innerHeight; facingMode: environment;');
+            arScene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
+            arScene.setAttribute('vr-mode-ui', 'enabled: false');
+            
+            // Create assets
+            const assets = document.createElement('a-assets');
+            
+            const treeModel = document.createElement('a-asset-item');
+            treeModel.setAttribute('id', 'tree-model');
+            treeModel.setAttribute('src', 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb');
+            
+            const benchModel = document.createElement('a-asset-item');
+            benchModel.setAttribute('id', 'bench-model');
+            benchModel.setAttribute('src', 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF-Binary/Duck.glb');
+            
+            const squirrelModel = document.createElement('a-asset-item');
+            squirrelModel.setAttribute('id', 'squirrel-model');
+            squirrelModel.setAttribute('src', 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Fox/glTF-Binary/Fox.glb');
+            
+            const playgroundModel = document.createElement('a-asset-item');
+            playgroundModel.setAttribute('id', 'playground-model');
+            playgroundModel.setAttribute('src', 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Avocado/glTF-Binary/Avocado.glb');
+            
+            assets.appendChild(treeModel);
+            assets.appendChild(benchModel);
+            assets.appendChild(squirrelModel);
+            assets.appendChild(playgroundModel);
+            
+            arScene.appendChild(assets);
+            
+            // Create Tree Marker
+            const treeMarker = document.createElement('a-marker');
+            treeMarker.setAttribute('type', 'pattern');
+            treeMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/hiro.patt');
+            treeMarker.setAttribute('play-on-visible', 'sound: tree');
+            
+            const treeEntity = document.createElement('a-entity');
+            treeEntity.setAttribute('class', 'model-entity');
+            treeEntity.setAttribute('gltf-model', '#tree-model');
+            treeEntity.setAttribute('scale', '0.5 0.5 0.5');
+            treeEntity.setAttribute('position', '0 0 0');
+            treeEntity.setAttribute('rotation', '0 0 0');
+            treeEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true');
+            treeEntity.setAttribute('model-loaded', '');
+            
+            treeMarker.appendChild(treeEntity);
+            arScene.appendChild(treeMarker);
+            
+            // Create Bench Marker
+            const benchMarker = document.createElement('a-marker');
+            benchMarker.setAttribute('type', 'pattern');
+            benchMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/kanji.patt');
+            benchMarker.setAttribute('play-on-visible', 'sound: bench');
+            
+            const benchEntity = document.createElement('a-entity');
+            benchEntity.setAttribute('class', 'model-entity');
+            benchEntity.setAttribute('gltf-model', '#bench-model');
+            benchEntity.setAttribute('scale', '0.2 0.2 0.2');
+            benchEntity.setAttribute('position', '0 0.5 0');
+            benchEntity.setAttribute('rotation', '0 0 0');
+            benchEntity.setAttribute('animation', 'property: position; to: 0 1 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true');
+            benchEntity.setAttribute('model-loaded', '');
+            
+            benchMarker.appendChild(benchEntity);
+            arScene.appendChild(benchMarker);
+            
+            // Create Squirrel Marker
+            const squirrelMarker = document.createElement('a-marker');
+            squirrelMarker.setAttribute('type', 'barcode');
+            squirrelMarker.setAttribute('value', '1');
+            squirrelMarker.setAttribute('play-on-visible', 'sound: squirrel');
+            
+            const squirrelEntity = document.createElement('a-entity');
+            squirrelEntity.setAttribute('class', 'model-entity');
+            squirrelEntity.setAttribute('gltf-model', '#squirrel-model');
+            squirrelEntity.setAttribute('scale', '0.05 0.05 0.05');
+            squirrelEntity.setAttribute('position', '0 0 0');
+            squirrelEntity.setAttribute('rotation', '0 0 0');
+            squirrelEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true');
+            squirrelEntity.setAttribute('model-loaded', '');
+            
+            squirrelMarker.appendChild(squirrelEntity);
+            arScene.appendChild(squirrelMarker);
+            
+            // Create Playground Marker
+            const playgroundMarker = document.createElement('a-marker');
+            playgroundMarker.setAttribute('type', 'barcode');
+            playgroundMarker.setAttribute('value', '2');
+            playgroundMarker.setAttribute('play-on-visible', 'sound: playground');
+            
+            const playgroundEntity = document.createElement('a-entity');
+            playgroundEntity.setAttribute('class', 'model-entity');
+            playgroundEntity.setAttribute('gltf-model', '#playground-model');
+            playgroundEntity.setAttribute('scale', '3 3 3');
+            playgroundEntity.setAttribute('position', '0 0 0');
+            playgroundEntity.setAttribute('rotation', '0 0 0');
+            playgroundEntity.setAttribute('animation', 'property: scale; to: 4 4 4; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true');
+            playgroundEntity.setAttribute('model-loaded', '');
+            
+            playgroundMarker.appendChild(playgroundEntity);
+            arScene.appendChild(playgroundMarker);
+            
+            // Create Camera
+            const camera = document.createElement('a-entity');
+            camera.setAttribute('camera', '');
+            arScene.appendChild(camera);
+            
+            // Append the scene to the body
+            document.body.appendChild(arScene);
+        }
 
         // Register components for animation and interactivity
         AFRAME.registerComponent('model-loaded', {
@@ -127,71 +283,5 @@
             }
         });
     </script>
-
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;' renderer='logarithmicDepthBuffer: true;' vr-mode-ui='enabled: false'>
-        <!-- Define custom marker patterns -->
-        <a-assets>
-            <!-- Add your model assets here -->
-            <a-asset-item id="tree-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb"></a-asset-item>
-            <a-asset-item id="bench-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
-            <a-asset-item id="squirrel-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Fox/glTF-Binary/Fox.glb"></a-asset-item>
-            <a-asset-item id="playground-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Avocado/glTF-Binary/Avocado.glb"></a-asset-item>
-        </a-assets>
-
-        <!-- Tree Marker -->
-        <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/hiro.patt" play-on-visible="sound: tree">
-            <a-entity 
-                class="model-entity"
-                gltf-model="#tree-model" 
-                scale="0.5 0.5 0.5" 
-                position="0 0 0" 
-                rotation="0 0 0"
-                animation="property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true"
-                model-loaded>
-            </a-entity>
-        </a-marker>
-
-        <!-- Bench Marker -->
-        <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/kanji.patt" play-on-visible="sound: bench">
-            <a-entity 
-                class="model-entity"
-                gltf-model="#bench-model" 
-                scale="0.2 0.2 0.2" 
-                position="0 0.5 0" 
-                rotation="0 0 0"
-                animation="property: position; to: 0 1 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true"
-                model-loaded>
-            </a-entity>
-        </a-marker>
-
-        <!-- Squirrel Marker -->
-        <a-marker type="barcode" value="1" play-on-visible="sound: squirrel">
-            <a-entity 
-                class="model-entity"
-                gltf-model="#squirrel-model" 
-                scale="0.05 0.05 0.05" 
-                position="0 0 0" 
-                rotation="0 0 0"
-                animation="property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true"
-                model-loaded>
-            </a-entity>
-        </a-marker>
-
-        <!-- Playground Marker -->
-        <a-marker type="barcode" value="2" play-on-visible="sound: playground">
-            <a-entity 
-                class="model-entity"
-                gltf-model="#playground-model" 
-                scale="3 3 3" 
-                position="0 0 0" 
-                rotation="0 0 0"
-                animation="property: scale; to: 4 4 4; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true"
-                model-loaded>
-            </a-entity>
-        </a-marker>
-
-        <!-- Camera -->
-        <a-entity camera></a-entity>
-    </a-scene>
 </body>
 </html>
