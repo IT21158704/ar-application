@@ -102,6 +102,11 @@
             })
         };
 
+        // Force hide loading screen after timeout (fallback)
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 10000);
+
         // Handle camera permission
         document.getElementById('grant-permission').addEventListener('click', function() {
             initializeAR();
@@ -113,104 +118,177 @@
             // Create the AR scene dynamically
             const arScene = document.createElement('a-scene');
             arScene.setAttribute('embedded', '');
-            arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/camera_para.dat; maxDetectionRate: 30; canvasWidth: window.innerWidth; canvasHeight: window.innerHeight; facingMode: environment;');
+            arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/camera_para.dat;');
             arScene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
             arScene.setAttribute('vr-mode-ui', 'enabled: false');
             
-            // Create assets
-            const assets = document.createElement('a-assets');
+            // Add loader event to hide loading screen when scene is ready
+            arScene.addEventListener('loaded', function () {
+                document.getElementById('loading').style.display = 'none';
+            });
             
-            const treeModel = document.createElement('a-asset-item');
-            treeModel.setAttribute('id', 'tree-model');
-            treeModel.setAttribute('src', 'assets/BoxAnimated.glb');
-            
-            const benchModel = document.createElement('a-asset-item');
-            benchModel.setAttribute('id', 'bench-model');
-            benchModel.setAttribute('src', 'assets/Duck.glb');
-            
-            const squirrelModel = document.createElement('a-asset-item');
-            squirrelModel.setAttribute('id', 'squirrel-model');
-            squirrelModel.setAttribute('src', 'assets/Fox.glb');
-            
-            const playgroundModel = document.createElement('a-asset-item');
-            playgroundModel.setAttribute('id', 'playground-model');
-            playgroundModel.setAttribute('src', 'assets/Avocado.glb');
-            
-            assets.appendChild(treeModel);
-            assets.appendChild(benchModel);
-            assets.appendChild(squirrelModel);
-            assets.appendChild(playgroundModel);
-            
-            arScene.appendChild(assets);
-            
-            // Create Tree Marker
+            // Create Tree Marker with primitive shapes instead of 3D models
             const treeMarker = document.createElement('a-marker');
             treeMarker.setAttribute('type', 'pattern');
             treeMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/hiro.patt');
             treeMarker.setAttribute('play-on-visible', 'sound: tree');
             
             const treeEntity = document.createElement('a-entity');
-            treeEntity.setAttribute('class', 'model-entity');
-            treeEntity.setAttribute('gltf-model', '#tree-model');
-            treeEntity.setAttribute('scale', '0.5 0.5 0.5');
-            treeEntity.setAttribute('position', '0 0 0');
-            treeEntity.setAttribute('rotation', '0 0 0');
+            treeEntity.setAttribute('position', '0 0.5 0');
+            
+            // Create tree trunk with cylinder
+            const treeTrunk = document.createElement('a-cylinder');
+            treeTrunk.setAttribute('color', '#8B4513');
+            treeTrunk.setAttribute('height', '1');
+            treeTrunk.setAttribute('radius', '0.2');
+            treeTrunk.setAttribute('position', '0 0 0');
+            
+            // Create tree top with cone
+            const treeTop = document.createElement('a-cone');
+            treeTop.setAttribute('color', '#228B22');
+            treeTop.setAttribute('height', '1');
+            treeTop.setAttribute('radius-bottom', '0.5');
+            treeTop.setAttribute('position', '0 1 0');
+            
+            treeEntity.appendChild(treeTrunk);
+            treeEntity.appendChild(treeTop);
             treeEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true');
-            treeEntity.setAttribute('model-loaded', '');
             
             treeMarker.appendChild(treeEntity);
             arScene.appendChild(treeMarker);
             
-            // Create Bench Marker
+            // Create Bench Marker with primitive shapes
             const benchMarker = document.createElement('a-marker');
             benchMarker.setAttribute('type', 'pattern');
             benchMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/kanji.patt');
             benchMarker.setAttribute('play-on-visible', 'sound: bench');
             
             const benchEntity = document.createElement('a-entity');
-            benchEntity.setAttribute('class', 'model-entity');
-            benchEntity.setAttribute('gltf-model', '#bench-model');
-            benchEntity.setAttribute('scale', '0.2 0.2 0.2');
-            benchEntity.setAttribute('position', '0 0.5 0');
-            benchEntity.setAttribute('rotation', '0 0 0');
-            benchEntity.setAttribute('animation', 'property: position; to: 0 1 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true');
-            benchEntity.setAttribute('model-loaded', '');
+            benchEntity.setAttribute('position', '0 0.25 0');
+            
+            // Create bench seat
+            const benchSeat = document.createElement('a-box');
+            benchSeat.setAttribute('color', '#8B4513');
+            benchSeat.setAttribute('width', '1.5');
+            benchSeat.setAttribute('height', '0.1');
+            benchSeat.setAttribute('depth', '0.5');
+            
+            // Create bench legs
+            const benchLeg1 = document.createElement('a-box');
+            benchLeg1.setAttribute('color', '#8B4513');
+            benchLeg1.setAttribute('width', '0.1');
+            benchLeg1.setAttribute('height', '0.3');
+            benchLeg1.setAttribute('depth', '0.5');
+            benchLeg1.setAttribute('position', '-0.6 -0.2 0');
+            
+            const benchLeg2 = document.createElement('a-box');
+            benchLeg2.setAttribute('color', '#8B4513');
+            benchLeg2.setAttribute('width', '0.1');
+            benchLeg2.setAttribute('height', '0.3');
+            benchLeg2.setAttribute('depth', '0.5');
+            benchLeg2.setAttribute('position', '0.6 -0.2 0');
+            
+            benchEntity.appendChild(benchSeat);
+            benchEntity.appendChild(benchLeg1);
+            benchEntity.appendChild(benchLeg2);
+            benchEntity.setAttribute('animation', 'property: position; to: 0 0.5 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true');
             
             benchMarker.appendChild(benchEntity);
             arScene.appendChild(benchMarker);
             
-            // Create Squirrel Marker
+            // Create Squirrel Marker with primitive shapes
             const squirrelMarker = document.createElement('a-marker');
             squirrelMarker.setAttribute('type', 'barcode');
             squirrelMarker.setAttribute('value', '1');
             squirrelMarker.setAttribute('play-on-visible', 'sound: squirrel');
             
             const squirrelEntity = document.createElement('a-entity');
-            squirrelEntity.setAttribute('class', 'model-entity');
-            squirrelEntity.setAttribute('gltf-model', '#squirrel-model');
-            squirrelEntity.setAttribute('scale', '0.05 0.05 0.05');
-            squirrelEntity.setAttribute('position', '0 0 0');
-            squirrelEntity.setAttribute('rotation', '0 0 0');
+            squirrelEntity.setAttribute('position', '0 0.5 0');
+            
+            // Create squirrel body
+            const squirrelBody = document.createElement('a-sphere');
+            squirrelBody.setAttribute('color', '#A52A2A');
+            squirrelBody.setAttribute('radius', '0.3');
+            
+            // Create squirrel head
+            const squirrelHead = document.createElement('a-sphere');
+            squirrelHead.setAttribute('color', '#A52A2A');
+            squirrelHead.setAttribute('radius', '0.2');
+            squirrelHead.setAttribute('position', '0 0.4 0');
+            
+            // Create squirrel tail
+            const squirrelTail = document.createElement('a-cylinder');
+            squirrelTail.setAttribute('color', '#A52A2A');
+            squirrelTail.setAttribute('height', '0.6');
+            squirrelTail.setAttribute('radius', '0.1');
+            squirrelTail.setAttribute('position', '-0.3 0.2 0');
+            squirrelTail.setAttribute('rotation', '0 0 -30');
+            
+            squirrelEntity.appendChild(squirrelBody);
+            squirrelEntity.appendChild(squirrelHead);
+            squirrelEntity.appendChild(squirrelTail);
             squirrelEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true');
-            squirrelEntity.setAttribute('model-loaded', '');
             
             squirrelMarker.appendChild(squirrelEntity);
             arScene.appendChild(squirrelMarker);
             
-            // Create Playground Marker
+            // Create Playground Marker with primitive shapes
             const playgroundMarker = document.createElement('a-marker');
             playgroundMarker.setAttribute('type', 'barcode');
             playgroundMarker.setAttribute('value', '2');
             playgroundMarker.setAttribute('play-on-visible', 'sound: playground');
             
             const playgroundEntity = document.createElement('a-entity');
-            playgroundEntity.setAttribute('class', 'model-entity');
-            playgroundEntity.setAttribute('gltf-model', '#playground-model');
-            playgroundEntity.setAttribute('scale', '3 3 3');
-            playgroundEntity.setAttribute('position', '0 0 0');
-            playgroundEntity.setAttribute('rotation', '0 0 0');
-            playgroundEntity.setAttribute('animation', 'property: scale; to: 4 4 4; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true');
-            playgroundEntity.setAttribute('model-loaded', '');
+            playgroundEntity.setAttribute('position', '0 0.25 0');
+            
+            // Create slide
+            const slide = document.createElement('a-box');
+            slide.setAttribute('color', '#4682B4');
+            slide.setAttribute('width', '0.2');
+            slide.setAttribute('height', '0.05');
+            slide.setAttribute('depth', '0.8');
+            slide.setAttribute('position', '-0.3 0.4 0');
+            slide.setAttribute('rotation', '0 0 -30');
+            
+            // Create swing frame
+            const swingFrame = document.createElement('a-entity');
+            
+            const swingTop = document.createElement('a-box');
+            swingTop.setAttribute('color', '#FF0000');
+            swingTop.setAttribute('width', '0.8');
+            swingTop.setAttribute('height', '0.05');
+            swingTop.setAttribute('depth', '0.05');
+            swingTop.setAttribute('position', '0.3 0.8 0');
+            
+            const swingPole1 = document.createElement('a-box');
+            swingPole1.setAttribute('color', '#FF0000');
+            swingPole1.setAttribute('width', '0.05');
+            swingPole1.setAttribute('height', '0.8');
+            swingPole1.setAttribute('depth', '0.05');
+            swingPole1.setAttribute('position', '0 0.4 0');
+            
+            const swingPole2 = document.createElement('a-box');
+            swingPole2.setAttribute('color', '#FF0000');
+            swingPole2.setAttribute('width', '0.05');
+            swingPole2.setAttribute('height', '0.8');
+            swingPole2.setAttribute('depth', '0.05');
+            swingPole2.setAttribute('position', '0.6 0.4 0');
+            
+            const swingSeat = document.createElement('a-box');
+            swingSeat.setAttribute('color', '#000000');
+            swingSeat.setAttribute('width', '0.2');
+            swingSeat.setAttribute('height', '0.05');
+            swingSeat.setAttribute('depth', '0.2');
+            swingSeat.setAttribute('position', '0.3 0.2 0');
+            
+            swingFrame.appendChild(swingTop);
+            swingFrame.appendChild(swingPole1);
+            swingFrame.appendChild(swingPole2);
+            swingFrame.appendChild(swingSeat);
+            
+            playgroundEntity.appendChild(slide);
+            playgroundEntity.appendChild(swingFrame);
+            playgroundEntity.setAttribute('animation', 'property: scale; to: 1.2 1.2 1.2; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true');
             
             playgroundMarker.appendChild(playgroundEntity);
             arScene.appendChild(playgroundMarker);
@@ -224,36 +302,29 @@
             document.body.appendChild(arScene);
         }
 
-        // Register components for animation and interactivity
-        AFRAME.registerComponent('model-loaded', {
-            init: function() {
-                this.el.addEventListener('model-loaded', () => {
-                    // Hide loading screen when models are loaded
-                    document.getElementById('loading').style.display = 'none';
-                });
-            }
-        });
-
-        // Animate models when they become visible
+        // Register component for marker interactions
         AFRAME.registerComponent('play-on-visible', {
             schema: {
                 sound: {type: 'string'}
             },
             init: function() {
                 this.el.addEventListener('markerFound', () => {
-                    // Play animation
-                    const model = this.el.querySelector('.model-entity');
-                    if (model && model.components.animation) {
-                        model.components.animation.playAnimation();
-                    }
+                    // Notify user that marker was found
+                    console.log('Marker found:', this.data.sound);
                     
                     // Play sound
                     if (this.data.sound && sounds[this.data.sound]) {
                         sounds[this.data.sound].play();
                     }
                     
-                    // Add particles effect
-                    this.createParticles();
+                    // Show notification
+                    const overlay = document.querySelector('.ar-overlay');
+                    overlay.textContent = `Found: ${this.data.sound} marker`;
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        overlay.textContent = 'AR Park Scene - Point camera at markers';
+                    }, 3000);
                 });
                 
                 this.el.addEventListener('markerLost', () => {
@@ -262,24 +333,6 @@
                         sounds[this.data.sound].stop();
                     }
                 });
-            },
-            createParticles: function() {
-                const particleEl = document.createElement('a-entity');
-                particleEl.setAttribute('particle-system', {
-                    preset: 'dust',
-                    particleCount: 100,
-                    duration: 2,
-                    size: 0.1
-                });
-                particleEl.setAttribute('position', '0 1 0');
-                this.el.appendChild(particleEl);
-                
-                // Remove particles after animation completes
-                setTimeout(() => {
-                    if (particleEl.parentNode) {
-                        particleEl.parentNode.removeChild(particleEl);
-                    }
-                }, 2000);
             }
         });
     </script>
