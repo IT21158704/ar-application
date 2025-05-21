@@ -6,7 +6,8 @@
     <title>AR Zoo Scene</title>
     <!-- Import A-Frame and then AR.js -->
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+      
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <!-- Include Howler.js for audio -->
@@ -67,6 +68,10 @@
             playground: new Howl({
                 src: ['https://soundbible.com/grab.php?id=2043&type=mp3'],
                 volume: 0.5
+            }),
+            eagle: new Howl({
+                src: ['http://soundbible.com/grab.php?id=1487&type=mp3'],
+                volume: 0.5
             })
         };
 
@@ -93,6 +98,12 @@
                     // if (model && model.components.animation) {
                     //     model.components.animation.playAnimation();
                     // }
+
+                        // Force animation to play
+                    const model = this.el.querySelector('[gltf-model]');
+                    if (model && model.components['animation-mixer']) {
+                        model.components['animation-mixer'].playAll();
+                    }
                     
                     // Play sound
                     if (this.data.sound && sounds[this.data.sound]) {
@@ -139,6 +150,7 @@
             <a-asset-item id="tree-model" src="assets/BoxAnimated.glb"></a-asset-item>
             <a-asset-item id="squirrel-model" src="assets/Fox.glb"></a-asset-item>
             <a-asset-item id="playground-model" src="assets/Avocado.glb"></a-asset-item>
+            <a-asset-item id="eagle" src="assets/eagle.glb"></a-asset-item>
         </a-assets>
 
         <!-- Tree Marker -->
@@ -192,6 +204,26 @@
                 model-loaded>
             </a-entity>
         </a-marker>
+
+        <!-- Eagle Marker -->
+        <a-marker 
+        type="pattern" 
+        url="markers/sky.patt" 
+        play-on-visible="sound: eagle"
+        emitevents="true"
+        cursor="rayOrigin: mouse"
+    >
+        <a-entity 
+            class="model-entity"
+            gltf-model="#eagle" 
+            scale="0.5 0.5 0.5" 
+            position="0 0.5 0" 
+            rotation="0 0 0"
+            animation-mixer="clip: *; loop: repeat; timeScale: 1"
+            model-loaded
+        >
+        </a-entity>
+    </a-marker>
 
         <!-- Camera -->
         <a-entity camera></a-entity>
