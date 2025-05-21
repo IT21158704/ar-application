@@ -1,340 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Park Scene</title>
-    <!-- Import A-Frame and then AR.js -->
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Include Howler.js for audio -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.core.min.js"></script>
+  <head>
+    <title>Marker-based AR - Park Scene</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-        .ar-overlay {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
-            font-family: Arial, sans-serif;
-        }
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-        }
-        #camera-permission {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1100;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        #camera-permission button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #camera-permission button:hover {
-            background-color: #45a049;
-        }
+      body, html { margin: 0; padding: 0; overflow: hidden; }
     </style>
-</head>
-<body>
-    <div class="loading" id="loading">Loading AR Experience... Please wait.</div>
-    <div id="camera-permission">
-        <h2>Camera Access Required</h2>
-        <p>Please allow access to your camera to use this AR experience.</p>
-        <button id="grant-permission">Enable Camera</button>
-    </div>
-    <div class="ar-overlay">
-        AR Park Scene - Point camera at markers
-    </div>
+  </head>
+  <body>
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+    >
+      <!-- Camera -->
+      <a-camera position="0 0 0" look-controls></a-camera>
 
-    <script>
-        // Sound effects using Howler.js
-        const sounds = {
-            tree: new Howl({
-                src: ['https://soundbible.com/grab.php?id=1764&type=mp3'],
-                volume: 0.5
-            }),
-            bench: new Howl({
-                src: ['https://soundbible.com/grab.php?id=2156&type=mp3'],
-                volume: 0.5
-            }),
-            squirrel: new Howl({
-                src: ['https://soundbible.com/grab.php?id=1631&type=mp3'],
-                volume: 0.5
-            }),
-            playground: new Howl({
-                src: ['https://soundbible.com/grab.php?id=2043&type=mp3'],
-                volume: 0.5
-            })
-        };
+      <!-- Marker for tree -->
+      <a-marker preset="hiro">
+        <a-entity
+          gltf-model="assets/Duck.glb"
+          position="0 0 0"
+          scale="0.5 0.5 0.5"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"
+        ></a-entity>
+      </a-marker>
 
-        // Force hide loading screen after timeout (fallback)
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-        }, 10000);
+      <!-- Marker for bird -->
+      <a-marker type="pattern" url="markers/watch.patt">
+        <a-entity
+          gltf-model="assets/Fox.glb"
+          position="0 0 0"
+          scale="0.3 0.3 0.3"
+          animation-mixer
+        ></a-entity>
+      </a-marker>
 
-        // Handle camera permission
-        document.getElementById('grant-permission').addEventListener('click', function() {
-            initializeAR();
-        });
+      <!-- Marker for bench -->
+      <a-marker type="pattern" url="markers/bench.patt">
+        <a-entity
+          gltf-model="assets/BoxAnimated.glb"
+          position="0 0 0"
+          scale="0.4 0.4 0.4"
+        ></a-entity>
+      </a-marker>
 
-        function initializeAR() {
-            document.getElementById('camera-permission').style.display = 'none';
-            
-            // Create the AR scene dynamically
-            const arScene = document.createElement('a-scene');
-            arScene.setAttribute('embedded', '');
-            arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/camera_para.dat;');
-            arScene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
-            arScene.setAttribute('vr-mode-ui', 'enabled: false');
-            
-            // Add loader event to hide loading screen when scene is ready
-            arScene.addEventListener('loaded', function () {
-                document.getElementById('loading').style.display = 'none';
-            });
-            
-            // Create Tree Marker with primitive shapes instead of 3D models
-            const treeMarker = document.createElement('a-marker');
-            treeMarker.setAttribute('type', 'pattern');
-            treeMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/hiro.patt');
-            treeMarker.setAttribute('play-on-visible', 'sound: tree');
-            
-            const treeEntity = document.createElement('a-entity');
-            treeEntity.setAttribute('position', '0 0.5 0');
-            
-            // Create tree trunk with cylinder
-            const treeTrunk = document.createElement('a-cylinder');
-            treeTrunk.setAttribute('color', '#8B4513');
-            treeTrunk.setAttribute('height', '1');
-            treeTrunk.setAttribute('radius', '0.2');
-            treeTrunk.setAttribute('position', '0 0 0');
-            
-            // Create tree top with cone
-            const treeTop = document.createElement('a-cone');
-            treeTop.setAttribute('color', '#228B22');
-            treeTop.setAttribute('height', '1');
-            treeTop.setAttribute('radius-bottom', '0.5');
-            treeTop.setAttribute('position', '0 1 0');
-            
-            treeEntity.appendChild(treeTrunk);
-            treeEntity.appendChild(treeTop);
-            treeEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true');
-            
-            treeMarker.appendChild(treeEntity);
-            arScene.appendChild(treeMarker);
-            
-            // Create Bench Marker with primitive shapes
-            const benchMarker = document.createElement('a-marker');
-            benchMarker.setAttribute('type', 'pattern');
-            benchMarker.setAttribute('url', 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/kanji.patt');
-            benchMarker.setAttribute('play-on-visible', 'sound: bench');
-            
-            const benchEntity = document.createElement('a-entity');
-            benchEntity.setAttribute('position', '0 0.25 0');
-            
-            // Create bench seat
-            const benchSeat = document.createElement('a-box');
-            benchSeat.setAttribute('color', '#8B4513');
-            benchSeat.setAttribute('width', '1.5');
-            benchSeat.setAttribute('height', '0.1');
-            benchSeat.setAttribute('depth', '0.5');
-            
-            // Create bench legs
-            const benchLeg1 = document.createElement('a-box');
-            benchLeg1.setAttribute('color', '#8B4513');
-            benchLeg1.setAttribute('width', '0.1');
-            benchLeg1.setAttribute('height', '0.3');
-            benchLeg1.setAttribute('depth', '0.5');
-            benchLeg1.setAttribute('position', '-0.6 -0.2 0');
-            
-            const benchLeg2 = document.createElement('a-box');
-            benchLeg2.setAttribute('color', '#8B4513');
-            benchLeg2.setAttribute('width', '0.1');
-            benchLeg2.setAttribute('height', '0.3');
-            benchLeg2.setAttribute('depth', '0.5');
-            benchLeg2.setAttribute('position', '0.6 -0.2 0');
-            
-            benchEntity.appendChild(benchSeat);
-            benchEntity.appendChild(benchLeg1);
-            benchEntity.appendChild(benchLeg2);
-            benchEntity.setAttribute('animation', 'property: position; to: 0 0.5 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true');
-            
-            benchMarker.appendChild(benchEntity);
-            arScene.appendChild(benchMarker);
-            
-            // Create Squirrel Marker with primitive shapes
-            const squirrelMarker = document.createElement('a-marker');
-            squirrelMarker.setAttribute('type', 'barcode');
-            squirrelMarker.setAttribute('value', '1');
-            squirrelMarker.setAttribute('play-on-visible', 'sound: squirrel');
-            
-            const squirrelEntity = document.createElement('a-entity');
-            squirrelEntity.setAttribute('position', '0 0.5 0');
-            
-            // Create squirrel body
-            const squirrelBody = document.createElement('a-sphere');
-            squirrelBody.setAttribute('color', '#A52A2A');
-            squirrelBody.setAttribute('radius', '0.3');
-            
-            // Create squirrel head
-            const squirrelHead = document.createElement('a-sphere');
-            squirrelHead.setAttribute('color', '#A52A2A');
-            squirrelHead.setAttribute('radius', '0.2');
-            squirrelHead.setAttribute('position', '0 0.4 0');
-            
-            // Create squirrel tail
-            const squirrelTail = document.createElement('a-cylinder');
-            squirrelTail.setAttribute('color', '#A52A2A');
-            squirrelTail.setAttribute('height', '0.6');
-            squirrelTail.setAttribute('radius', '0.1');
-            squirrelTail.setAttribute('position', '-0.3 0.2 0');
-            squirrelTail.setAttribute('rotation', '0 0 -30');
-            
-            squirrelEntity.appendChild(squirrelBody);
-            squirrelEntity.appendChild(squirrelHead);
-            squirrelEntity.appendChild(squirrelTail);
-            squirrelEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true');
-            
-            squirrelMarker.appendChild(squirrelEntity);
-            arScene.appendChild(squirrelMarker);
-            
-            // Create Playground Marker with primitive shapes
-            const playgroundMarker = document.createElement('a-marker');
-            playgroundMarker.setAttribute('type', 'barcode');
-            playgroundMarker.setAttribute('value', '2');
-            playgroundMarker.setAttribute('play-on-visible', 'sound: playground');
-            
-            const playgroundEntity = document.createElement('a-entity');
-            playgroundEntity.setAttribute('position', '0 0.25 0');
-            
-            // Create slide
-            const slide = document.createElement('a-box');
-            slide.setAttribute('color', '#4682B4');
-            slide.setAttribute('width', '0.2');
-            slide.setAttribute('height', '0.05');
-            slide.setAttribute('depth', '0.8');
-            slide.setAttribute('position', '-0.3 0.4 0');
-            slide.setAttribute('rotation', '0 0 -30');
-            
-            // Create swing frame
-            const swingFrame = document.createElement('a-entity');
-            
-            const swingTop = document.createElement('a-box');
-            swingTop.setAttribute('color', '#FF0000');
-            swingTop.setAttribute('width', '0.8');
-            swingTop.setAttribute('height', '0.05');
-            swingTop.setAttribute('depth', '0.05');
-            swingTop.setAttribute('position', '0.3 0.8 0');
-            
-            const swingPole1 = document.createElement('a-box');
-            swingPole1.setAttribute('color', '#FF0000');
-            swingPole1.setAttribute('width', '0.05');
-            swingPole1.setAttribute('height', '0.8');
-            swingPole1.setAttribute('depth', '0.05');
-            swingPole1.setAttribute('position', '0 0.4 0');
-            
-            const swingPole2 = document.createElement('a-box');
-            swingPole2.setAttribute('color', '#FF0000');
-            swingPole2.setAttribute('width', '0.05');
-            swingPole2.setAttribute('height', '0.8');
-            swingPole2.setAttribute('depth', '0.05');
-            swingPole2.setAttribute('position', '0.6 0.4 0');
-            
-            const swingSeat = document.createElement('a-box');
-            swingSeat.setAttribute('color', '#000000');
-            swingSeat.setAttribute('width', '0.2');
-            swingSeat.setAttribute('height', '0.05');
-            swingSeat.setAttribute('depth', '0.2');
-            swingSeat.setAttribute('position', '0.3 0.2 0');
-            
-            swingFrame.appendChild(swingTop);
-            swingFrame.appendChild(swingPole1);
-            swingFrame.appendChild(swingPole2);
-            swingFrame.appendChild(swingSeat);
-            
-            playgroundEntity.appendChild(slide);
-            playgroundEntity.appendChild(swingFrame);
-            playgroundEntity.setAttribute('animation', 'property: scale; to: 1.2 1.2 1.2; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true');
-            
-            playgroundMarker.appendChild(playgroundEntity);
-            arScene.appendChild(playgroundMarker);
-            
-            // Create Camera
-            const camera = document.createElement('a-entity');
-            camera.setAttribute('camera', '');
-            arScene.appendChild(camera);
-            
-            // Append the scene to the body
-            document.body.appendChild(arScene);
-        }
-
-        // Register component for marker interactions
-        AFRAME.registerComponent('play-on-visible', {
-            schema: {
-                sound: {type: 'string'}
-            },
-            init: function() {
-                this.el.addEventListener('markerFound', () => {
-                    // Notify user that marker was found
-                    console.log('Marker found:', this.data.sound);
-                    
-                    // Play sound
-                    if (this.data.sound && sounds[this.data.sound]) {
-                        sounds[this.data.sound].play();
-                    }
-                    
-                    // Show notification
-                    const overlay = document.querySelector('.ar-overlay');
-                    overlay.textContent = `Found: ${this.data.sound} marker`;
-                    
-                    // Reset after 3 seconds
-                    setTimeout(() => {
-                        overlay.textContent = 'AR Park Scene - Point camera at markers';
-                    }, 3000);
-                });
-                
-                this.el.addEventListener('markerLost', () => {
-                    // Stop sound when marker is lost
-                    if (this.data.sound && sounds[this.data.sound]) {
-                        sounds[this.data.sound].stop();
-                    }
-                });
-            }
-        });
-    </script>
-</body>
+      <!-- AR environment -->
+      <a-entity light="type: ambient; color: #fff"></a-entity>
+    </a-scene>
+  </body>
 </html>
