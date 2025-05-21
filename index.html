@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Park Scene</title>
     <!-- Import A-Frame and then AR.js -->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <!-- Include Howler.js for audio -->
@@ -51,7 +53,7 @@
         // Sound effects using Howler.js
         const sounds = {
             tree: new Howl({
-                src: ['audio/duck-quack.mp3'],
+                src: ['audio/horse.mp3'],
                 volume: 0.5
             }),
             bench: new Howl({
@@ -133,8 +135,8 @@
         <!-- Define custom marker patterns -->
         <a-assets>
             <!-- Add your model assets here -->
+            <a-asset-item id="trex-model" src="assets/horse.glb"></a-asset-item>
             <a-asset-item id="tree-model" src="assets/BoxAnimated.glb"></a-asset-item>
-            <a-asset-item id="bench-model" src="assets/Duck.glb"></a-asset-item>
             <a-asset-item id="squirrel-model" src="assets/Fox.glb"></a-asset-item>
             <a-asset-item id="playground-model" src="assets/Avocado.glb"></a-asset-item>
         </a-assets>
@@ -143,8 +145,8 @@
         <a-marker type="pattern" url="markers/ar.patt" play-on-visible="sound: tree">
             <a-entity 
                 class="model-entity"
-                gltf-model="#bench-model" 
-                scale="0.5 0.5 0.5" 
+                gltf-model="#trex-model" 
+                scale="1 1 1" 
                 position="0 0 0" 
                 rotation="0 0 0"
                 animation="property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true"
@@ -166,7 +168,7 @@
         </a-marker>
 
         <!-- Squirrel Marker -->
-        <a-marker type="barcode" value="1" play-on-visible="sound: squirrel">
+        <a-marker type="pattern" url="markers/tree.patt" play-on-visible="sound: bench">
             <a-entity 
                 class="model-entity"
                 gltf-model="#squirrel-model" 
