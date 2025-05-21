@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Zoo Scene</title>
-    <!-- Import A-Frame and then AR.js -->
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-      
+    <!-- Import A-Frame first -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Import aframe-extras with animation-mixer -->
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <!-- Import AR.js after A-Frame -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <!-- Include Howler.js for audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.core.min.js"></script>
@@ -53,26 +53,14 @@
     <script>
         // Sound effects using Howler.js
         const sounds = {
-            tree: new Howl({
+            horse: new Howl({
                 src: ['audio/horse.mp3'],
                 volume: 0.5
             }),
-            bench: new Howl({
-                src: ['https://soundbible.com/grab.php?id=2156&type=mp3'],
-                volume: 0.5
-            }),
-            squirrel: new Howl({
-                src: ['https://soundbible.com/grab.php?id=1631&type=mp3'],
-                volume: 0.5
-            }),
-            playground: new Howl({
-                src: ['https://soundbible.com/grab.php?id=2043&type=mp3'],
-                volume: 0.5
-            }),
             eagle: new Howl({
-                src: ['http://soundbible.com/grab.php?id=1487&type=mp3'],
+                src: ['audio/eagle.mp3'],
                 volume: 0.5
-            })
+            }),
         };
 
         // Register components for animation and interactivity
@@ -93,16 +81,12 @@
             init: function() {
                 this.el.addEventListener('markerFound', () => {
                     console.log(`Marker found: ${this.data.sound}`);
-                    // Play animation
-                    // const model = this.el.querySelector('.model-entity');
-                    // if (model && model.components.animation) {
-                    //     model.components.animation.playAnimation();
-                    // }
-
-                        // Force animation to play
-                    const model = this.el.querySelector('[gltf-model]');
+                    
+                    // Play animation - accessing animation-mixer component
+                    const model = this.el.querySelector('[animation-mixer]');
                     if (model && model.components['animation-mixer']) {
-                        model.components['animation-mixer'].playAll();
+                        console.log("Playing animation");
+                        model.components['animation-mixer'].play();
                     }
                     
                     // Play sound
@@ -146,22 +130,22 @@
         <!-- Define custom marker patterns -->
         <a-assets>
             <!-- Add your model assets here -->
-            <a-asset-item id="trex-model" src="assets/horse.glb"></a-asset-item>
+            <a-asset-item id="horse-model" src="assets/horse.glb"></a-asset-item>
             <a-asset-item id="tree-model" src="assets/BoxAnimated.glb"></a-asset-item>
             <a-asset-item id="squirrel-model" src="assets/Fox.glb"></a-asset-item>
             <a-asset-item id="playground-model" src="assets/Avocado.glb"></a-asset-item>
             <a-asset-item id="eagle" src="assets/eagle.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Tree Marker -->
-        <a-marker type="pattern" url="markers/ar.patt" play-on-visible="sound: tree">
+        <!-- Horse Marker -->
+        <a-marker type="pattern" url="markers/kanji.patt" play-on-visible="sound: horse">
             <a-entity 
                 class="model-entity"
-                gltf-model="#trex-model" 
+                gltf-model="#horse-model" 
                 scale="0.5 0.5 0.5" 
                 position="0 0 0" 
                 rotation="0 0 0"
-                animation="property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
                 model-loaded>
             </a-entity>
         </a-marker>
@@ -174,7 +158,7 @@
                 scale="0.2 0.2 0.2" 
                 position="0 0.5 0" 
                 rotation="0 0 0"
-                animation="property: position; to: 0 1 0; dir: alternate; dur: 2000; easing: easeInOutQuad; loop: true"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
                 model-loaded>
             </a-entity>
         </a-marker>
@@ -187,7 +171,7 @@
                 scale="0.05 0.05 0.05" 
                 position="0 0 0" 
                 rotation="0 0 0"
-                animation="property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
                 model-loaded>
             </a-entity>
         </a-marker>
@@ -200,30 +184,28 @@
                 scale="3 3 3" 
                 position="0 0 0" 
                 rotation="0 0 0"
-                animation="property: scale; to: 4 4 4; dir: alternate; dur: 1000; easing: easeInOutQuad; loop: true"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
                 model-loaded>
             </a-entity>
         </a-marker>
 
         <!-- Eagle Marker -->
         <a-marker 
-        type="pattern" 
-        url="markers/sky.patt" 
-        play-on-visible="sound: eagle"
-        emitevents="true"
-        cursor="rayOrigin: mouse"
-    >
-        <a-entity 
-            class="model-entity"
-            gltf-model="#eagle" 
-            scale="0.5 0.5 0.5" 
-            position="0 0.5 0" 
-            rotation="0 0 0"
-            animation-mixer="clip: *; loop: repeat; timeScale: 1"
-            model-loaded
-        >
-        </a-entity>
-    </a-marker>
+            type="pattern" 
+            url="markers/sky.patt" 
+            play-on-visible="sound: eagle"
+            emitevents="true"
+            cursor="rayOrigin: mouse">
+            <a-entity 
+                class="model-entity"
+                gltf-model="#eagle" 
+                scale="0.5 0.5 0.5" 
+                position="0 0.5 0" 
+                rotation="0 0 0"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
+                model-loaded>
+            </a-entity>
+        </a-marker>
 
         <!-- Camera -->
         <a-entity camera></a-entity>
