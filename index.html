@@ -85,11 +85,12 @@
             },
             init: function() {
                 this.el.addEventListener('markerFound', () => {
+                    console.log(`Marker found: ${this.data.sound}`);
                     // Play animation
-                    const model = this.el.querySelector('.model-entity');
-                    if (model && model.components.animation) {
-                        model.components.animation.playAnimation();
-                    }
+                    // const model = this.el.querySelector('.model-entity');
+                    // if (model && model.components.animation) {
+                    //     model.components.animation.playAnimation();
+                    // }
                     
                     // Play sound
                     if (this.data.sound && sounds[this.data.sound]) {
@@ -139,10 +140,10 @@
         </a-assets>
 
         <!-- Tree Marker -->
-        <a-marker type="pattern" url="markers/watch.patt" play-on-visible="sound: tree">
+        <a-marker type="pattern" url="markers/ar.patt" play-on-visible="sound: tree">
             <a-entity 
                 class="model-entity"
-                gltf-model="#tree-model" 
+                gltf-model="#bench-model" 
                 scale="0.5 0.5 0.5" 
                 position="0 0 0" 
                 rotation="0 0 0"
@@ -152,7 +153,7 @@
         </a-marker>
 
         <!-- Bench Marker -->
-        <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/patterns/kanji.patt" play-on-visible="sound: bench">
+        <a-marker type="pattern" url="markers/hiro.patt" play-on-visible="sound: bench">
             <a-entity 
                 class="model-entity"
                 gltf-model="#bench-model" 
